@@ -1,0 +1,35 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json# ",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storageAccountBasename": {
+            "type" : "string"
+        },
+        "location": {
+            "type" : "string"
+        },
+        "numberOfStorageAccounts": {
+            "type": "int"
+        },
+        "storageAccountType": {
+            "type": "string"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[concat(parameters('storageAccountBasename'), copyIndex())]",
+            "apiVersion": "2015-06-15",
+            "location": "[parameters('location')]",
+            "copy": {
+                "name": "storageAccountLoop",
+                "count": "[parameters('numberOfStorageAccounts')]"
+            },
+            "properties": {
+                "accountType": "[parameters('storageAccountType')]"
+            }
+        }
+    ],
+    "outputs" : {}
+}

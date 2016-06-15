@@ -1,0 +1,222 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json# ",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"nodeCount": {
+			"type": "int"
+		},
+		"vmSize": {
+			"type": "string"
+		},
+		"clusterName": {
+			"type": "string"
+		},
+		"roleType": {
+			"type": "string"
+		},        
+		"adminUsername": {
+			"type": "securestring"
+		},
+		"adminPassword": {
+			"type": "securestring",
+			"defaultValue": ""
+		},
+		"sshKey": {
+			"type": "securestring",
+			"defaultValue": ""
+		},
+		"authenticationType": {
+			"type": "string",
+			"defaultValue": "password",
+			"allowedValues": [
+				"password",
+				"sshPublicKey"
+			]
+		},
+		"location": {
+			"type": "string"
+		},
+		"scriptUri": {
+			"type": "string"
+		},
+		"storageAccountBasename": {
+			"type": "string"
+		},
+		"vmBasename": {
+			"type": "string"
+		},
+		"ipOffset": {
+			"type": "int"
+		},
+         "vnetName": {
+            "type": "string"
+        },
+        "vnetSubnetName": {
+            "type": "string"
+        },
+        "vnetStartAddress": {
+            "type": "string"
+        },
+        "vnetRGName": {
+            "type": "string"
+        }
+	},
+	"variables": {
+		"numberOfDataDisks": 0,
+		"numberOfDisksPerNode": "[add(variables('numberOfDataDisks'), 1)]",
+		"storageAccountType": "Standard_LRS",
+		"maxDisksPerStorageAccount": 40,
+		"numberOfNodesPerStorageAccount": "[div(variables('maxDisksPerStorageAccount'), variables('numberOfDisksPerNode'))]",
+		"numberOfNodes": "[parameters('nodeCount')]",
+		"module": "[mod(variables('numberOfNodes'), variables('numberOfNodesPerStorageAccount'))]",
+        "moduleReplacing9" : "[replace(string(variables('module')), '9', '1')]",
+        "moduleReplacing8" : "[replace(string(variables('moduleReplacing9')), '8', '1')]",
+        "moduleReplacing7" : "[replace(string(variables('moduleReplacing8')), '7', '1')]",
+        "moduleReplacing6" : "[replace(string(variables('moduleReplacing7')), '6', '1')]",
+        "moduleReplacing5" : "[replace(string(variables('moduleReplacing6')), '5', '1')]",
+        "moduleReplacing4" : "[replace(string(variables('moduleReplacing5')), '4', '1')]",
+        "moduleReplacing3" : "[replace(string(variables('moduleReplacing4')), '3', '1')]",
+        "moduleReplacing2" : "[replace(string(variables('moduleReplacing3')), '2', '1')]",
+        "numberOfStorageAccounts": "[add(div(variables('numberOfNodes'), variables('numberOfNodesPerStorageAccount')), int(variables('moduleReplacing2')))]",
+		"availabilitySetName": "[concat(parameters('roleType'), 'AS')]"
+	},
+	"resources": [{
+		"name": "[concat(parameters('clusterName'), parameters('roleType'), 'network')]",
+		"type": "Microsoft.Resources/deployments",
+		"apiVersion": "2015-01-01",
+		"properties": {
+			"mode": "Incremental",
+			"templateLink": {
+				"uri": "[concat(parameters('scriptUri'), '/network.json')]",
+				"contentVersion": "1.0.0.0"
+			},
+			"parameters": {
+				"nodeCount": {
+					"value": "[parameters('nodeCount')]"
+				},
+				"roleType": {
+					"value": "[parameters('roleType')]"
+				},                
+				"clusterName": {
+					"value": "[parameters('clusterName')]"
+				},
+				"vnetName": {
+					"value": "[parameters('vnetName')]"
+				},
+				"vnetSubnetName": {
+					"value": "[parameters('vnetSubnetName')]"
+				},
+				"vnetStartAddress": {
+					"value": "[parameters('vnetStartAddress')]"
+				},
+				"vnetRGName": {
+					"value": "[parameters('vnetRGName')]"
+				},
+				"ipOffset": {
+					"value": "[parameters('ipOffset')]"
+				},
+				"location": {
+					"value": "[parameters('location')]"
+				}
+			}
+		}
+	}, {
+		"type": "Microsoft.Compute/availabilitySets",
+		"name": "[variables('availabilitySetName')]",
+		"apiVersion": "2015-06-15",
+		"location": "[parameters('location')]",
+		"properties": {}
+	}, {
+		"name": "[concat(parameters('clusterName'), parameters('roleType'), 'storage')]",
+		"type": "Microsoft.Resources/deployments",
+		"apiVersion": "2015-01-01",
+		"properties": {
+			"mode": "Incremental",
+			"templateLink": {
+				"uri": "[concat(parameters('scriptUri'), '/storage.json')]",
+				"contentVersion": "1.0.0.0"
+			},
+			"parameters": {
+				"storageAccountBasename": {
+					"value": "[concat(parameters('roleType'), parameters('storageAccountBasename'))]"
+				},
+				"location": {
+					"value": "[parameters('location')]"
+				},
+				"numberOfStorageAccounts": {
+					"value": "[variables('numberOfStorageAccounts')]"
+				},
+				"storageAccountType": {
+					"value": "[variables('storageAccountType')]"
+				}
+			}
+		}
+	}, {
+		"name": "[concat(parameters('clusterName'), parameters('roleType'), copyindex())]",
+		"type": "Microsoft.Resources/deployments",
+		"apiVersion": "2015-01-01",
+		"copy": {
+			"name": "nodesLoop",
+			"count": "[parameters('nodeCount')]"
+		},
+		"dependsOn": [
+			"[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]",
+			"[concat('Microsoft.Resources/deployments/', parameters('clusterName'), parameters('roleType'), 'network')]",
+            "[concat('Microsoft.Resources/deployments/', parameters('clusterName'), parameters('roleType'), 'storage')]"
+		],
+		"properties": {
+			"mode": "Incremental",
+			"templateLink": {
+				"uri": "[concat(parameters('scriptUri'), '/vm.json')]",
+				"contentVersion": "1.0.0.0"
+			},
+			"parameters": {
+				"clusterName": {
+					"value": "[parameters('clusterName')]"
+				},
+				"vmSize": {
+					"value": "[parameters('vmSize')]"
+				},
+				"vmName": {
+					"value": "[concat(parameters('vmBasename'), copyIndex())]"
+				},
+				"adminUsername": {
+					"value": "[parameters('adminUsername')]"
+				},
+				"adminPassword": {
+					"value": "[parameters('adminPassword')]"
+				},
+				"sshKey": {
+					"value": "[parameters('sshKey')]"
+				},
+				"authenticationType": {
+					"value": "[parameters('authenticationType')]"
+				},
+				"numberOfDataDisks": {
+					"value": "[variables('numberOfDataDisks')]"
+				},
+				"location": {
+					"value": "[parameters('location')]"
+				},
+				"nicName": {
+					"value": "[concat(parameters('clusterName'), '-', parameters('roleType'), '-nic', copyIndex())]"
+				},
+				"scriptUri": {
+					"value": "[parameters('scriptUri')]"
+				},
+				"availabilitySetName": {
+					"value": "[variables('availabilitySetName')]"
+				},
+				"storageAccountBasename": {
+					"value": "[concat(parameters('roleType'), parameters('storageAccountBasename'))]"
+				},
+				"nodeIndex": {
+					"value": "[copyIndex()]"
+				},
+				"numberOfNodesPerStorageAccount": {
+					"value": "[variables('numberOfNodesPerStorageAccount')]"
+				}
+			}
+		}
+	}]
+}

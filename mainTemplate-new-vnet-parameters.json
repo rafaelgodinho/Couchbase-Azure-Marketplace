@@ -1,0 +1,62 @@
+{
+  "artifactsBaseUrl": {
+    "value": "https://rgcb.blob.core.windows.net/deployrg"
+  },
+  "dataNodeCount": {
+    "value": 3
+  },
+  "indexNodeCount": {
+    "value": 3
+  },
+  "queryNodeCount": {
+    "value": 3
+  },  
+  "dataVmSize": {
+    "value": "Standard_D4_v2"
+  },
+  "indexVmSize": {
+    "value": "Standard_D4_v2"
+  },
+  "queryVmSize": {
+    "value": "Standard_D4_v2"
+  },  
+  "clusterName": {
+    "value": "rgcb97"
+  },
+  "adminUsername": {
+    "value": "azureuser"
+  },
+  "adminPassword": {
+    "value": "SuperP@ssw0rd"
+  },
+  "sshKey": {
+    "value": ""
+  },
+  "authenticationType": {
+    "value": "password"
+  },
+  "vnetNewOrExisting": {
+      "value": "new"
+  },
+  "vnetName": {
+      "value": "cbvnettest"
+  },
+  "vnetSubnetName": {
+      "value": "mysubnet"
+  },
+  "vnetRGName": {
+      "value": "rgcb97"
+  },
+  "vnetAddressPrefix": {
+      "value": "10.5.0.0/16"
+  },
+  "vnetSubnetAddressPrefix": {
+      "value": "10.5.0.0/24"
+  },
+  "vnetStartAddress": {
+      "value": "10.5.0.4"
+  },  
+  "location": {
+    "value": "westus"
+  }
+}

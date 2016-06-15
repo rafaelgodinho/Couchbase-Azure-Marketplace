@@ -1,0 +1,129 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json# ",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "clusterName" : {
+            "type": "string"
+        },
+        "vmSize" : {
+            "type": "string",
+            "defaultValue": "Standard_A0"
+        },
+        "storageAccountBasename": {
+            "type": "string"
+        },        
+        "vmName": {
+            "type": "string"
+        },
+        "adminUsername": {
+            "type": "securestring"
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "defaultValue": ""
+        },
+        "sshKey": {
+            "defaultValue": "",
+            "type": "securestring"
+        },
+        "authenticationType": {
+            "type": "string",
+            "defaultValue" : "password",
+            "allowedValues": [
+                "password", 
+                "sshPublicKey"
+            ]
+        },                
+        "numberOfDataDisks":{
+            "type": "int",
+            "defaultValue": 0
+        },
+        "location": {
+            "type": "string"
+        },
+        "nicName": {
+            "type": "string"
+        },
+        "scriptUri": {
+            "type": "string"
+        },
+        "availabilitySetName": {
+            "type": "string"
+        },
+        "nodeIndex": {
+            "type": "int"
+        },
+        "numberOfNodesPerStorageAccount": {
+            "type": "int"
+        }
+    },
+    "variables": {
+        "imagePublisher" : "Canonical",
+        "imageOffer" : "UbuntuServer",
+        "imageSKU" : "12.04.5-LTS",
+        "imageVersion": "latest",
+        "storageAccountName": "[concat(parameters('storageAccountBaseName'), div(parameters('nodeIndex'), parameters('numberOfNodesPerStorageAccount')))]",
+        "password_osProfile": {
+            "computername": "[parameters('vmName')]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "adminPassword": "[parameters('adminPassword')]"
+        },
+        "sshPublicKey_osProfile": {
+          "computername": "[parameters('vmName')]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "linuxConfiguration": {
+                "disablePasswordAuthentication": "true",
+                "ssh": {
+                    "publicKeys": [
+                        {
+                        "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                        "keyData": "[parameters('sshKey')]"
+                        }
+                    ]
+                }
+            }
+        },
+        "osProfile": "[variables(concat(parameters('authenticationType'), '_osProfile'))]",
+        "sizeOfEachDataDiskInGB": 1023
+    },
+    "resources": [
+    {
+        "apiVersion": "2015-06-15",
+        "type": "Microsoft.Compute/virtualMachines",
+        "name": "[parameters('vmName')]",
+        "location": "[parameters('location')]",
+        "properties": {
+            "availabilitySet": {
+                "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySetName'))]"
+            },            
+            "hardwareProfile": {
+                "vmSize": "[parameters('vmSize')]"
+            },
+            "osProfile": "[variables('osProfile')]",
+            "storageProfile": {
+                "imageReference": {
+                    "publisher": "[variables('imagePublisher')]",
+                    "offer": "[variables('imageOffer')]",
+                    "sku": "[variables('imageSKU')]",
+                    "version": "[variables('imageVersion')]"
+                },
+              "osDisk" : {
+                "name": "osDisk",
+                "createOption": "FromImage",
+                "vhd": {
+                   "uri": "[concat('http://', variables('storageAccountName'), '.blob.core.windows.net/vhds/', parameters('clusterName'), '-', parameters('vmName'), '-osdisk.vhd')]"
+                },
+                "caching": "ReadWrite"
+              }
+            },
+            "networkProfile": {
+                "networkInterfaces" : [
+                {
+                    "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('nicName'))]"
+                }
+                ]
+            }
+        }
+    }
+    ]
+}
