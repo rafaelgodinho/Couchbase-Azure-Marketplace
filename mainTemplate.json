@@ -4,7 +4,7 @@
   "parameters": {
     "artifactsBaseUrl": {
       "type": "string",
-      "defaultValue": "https://rgcb.blob.core.windows.net/deploy",
+      "defaultValue": "https://rgcb.blob.core.windows.net/deployrg",
       "metadata": {
         "artifactsBaseUrl": "Base URL of template gallery package"
       }
@@ -19,19 +19,23 @@
       "type": "int"
     },
     "queryNodeCount": {
-      "type": "int"
+      "type": "int",
+      "defaultValue": 0
     },
     "indexNodeCount": {
-      "type": "int"
+      "type": "int",
+      "defaultValue": 0
     },
     "dataVmSize": {
       "type": "string"
     },
     "queryVmSize": {
-      "type": "string"
+      "type": "string",
+      "defaultValue": ""
     },
     "indexVmSize": {
-      "type": "string"
+      "type": "string",
+      "defaultValue": ""
     },
     "cbUsername": {
       "type": "securestring"
@@ -60,7 +64,11 @@
       ]
     },
     "vnetNewOrExisting": {
-        "type": "string"
+      "type": "string",
+      "allowedValues": [
+        "new",
+        "existing"
+      ]
     },
     "vnetName": {
         "type": "string"
@@ -69,7 +77,8 @@
         "type": "string"
     },
     "vnetAddressPrefix": {
-        "type": "string"
+        "type": "string",
+        "defaultValue": ""
     },
     "vnetSubnetAddressPrefix": {
         "type": "string"

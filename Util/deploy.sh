@@ -20,7 +20,8 @@ templateUri="https://$storageAccountName.blob.core.windows.net/$containerName/ma
 # Valid parameters file:
 #   - ./Params/mainTemplate.mds.password.newVNet.parameters.json
 #   - ./Params/mainTemplate.nonMds.password.newVNet.parameters.json
-parametersFile="./Params/mainTemplate.mds.password.newVNet.parameters.json"
+#   - ./Params/UIOutput.json
+parametersFile="./Params/UIOutput.json"
 deploymentName="deploy$newResourceGroupName"
 
 echo "Deploying $parametersFile"

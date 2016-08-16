@@ -288,7 +288,7 @@
         ]
       },
       {
-        "name": "vnet",
+        "name": "networkInfo",
         "label": "Virtual Network",
         "subLabel": {
           "preValidation": "Configure virtual network of the cluster",
@@ -326,7 +326,7 @@
                 },
                 "constraints": {
                   "minAddressPrefixSize": "/26",
-                  "minAddressCount": "[add(add(mul(steps('nodeConfig').queryNodeCount, basics('Basics').mds), mul(steps('nodeConfig').indexNodeCount, basics('Basics').mds)), steps('nodeConfig').dataNodeCount)]",                  
+                  "minAddressCount": "[add(add(mul(coalesce(steps('nodeConfig').queryNodeCount, 0), basics('Basics').mds), mul(coalesce(steps('nodeConfig').indexNodeCount, 0), basics('Basics').mds)), steps('nodeConfig').dataNodeCount)]",
                   "requireContiguousAddresses": true
                 }
               }
@@ -337,6 +337,28 @@
       }
     ],
     "outputs": {
+      "dataNodeCount": "[int(steps('nodeConfig').dataNodeCount)]",
+      "indexNodeCount": "[int(steps('nodeConfig').indexNodeCount)]",
+      "queryNodeCount": "[int(steps('nodeConfig').queryNodeCount)]",
+      "dataVmSize": "[steps('nodeConfig').dataVmSize]",
+      "indexVmSize": "[steps('nodeConfig').indexVmSize]",
+      "queryVmSize": "[steps('nodeConfig').queryVmSize]",
+      "clusterName": "[basics('Basics').clusterName]",
+      "mds": "[basics('Basics').mds]",
+      "adminUsername": "[steps('credentials').Linux.adminUsername]",
+      "adminPassword": "[steps('credentials').Linux.credentials.password]",
+      "sshKey": "[steps('credentials').Linux.credentials.sshPublicKey]",
+      "authenticationType": "[steps('credentials').Linux.credentials.authenticationType]",
+      "cbUsername": "[steps('credentials').Couchbase.couchbaseAdministratorUsername]",
+      "cbPassword": "[steps('credentials').Couchbase.couchbasePassword]",
+      "vnetNewOrExisting" : "[steps('networkInfo').vnetSelector.newOrExisting]",
+      "vnetAddressPrefix" : "[steps('networkInfo').vnetSelector.addressPrefix]",
+      "vnetName": "[steps('networkInfo').vnetSelector.name]",
+      "vnetRGName": "[steps('networkInfo').vnetSelector.resourceGroup]",      
+      "vnetSubnetName": "[steps('networkInfo').vnetSelector.subnets.subnet1.name]",
+      "vnetSubnetAddressPrefix": "[steps('networkInfo').vnetSelector.subnets.subnet1.addressPrefix]",
+      "vnetStartAddress": "[steps('networkInfo').vnetSelector.subnets.subnet1.startAddress]",
+      "location" : "[location()]"
     }
   }
 }
