@@ -70,10 +70,10 @@
                     "privateIPAllocationMethod": "Static",
                     "privateIPAddress": "[concat(variables('ipOct01'), add(variables('ipOct2'), div(copyIndex(variables('ipOct3')), 256)), '.', mod(copyIndex(variables('ipOct3')), 256))]",
                     "subnet": {
-                        "id": "[concat(resourceId(parameters('vnetRGName'), 'Microsoft.Network/virtualNetworks', concat(parameters('vnetName'))), '/subnets/', parameters('vnetSubnetName'))]"
+                        "id": "[concat(resourceId(parameters('vnetRGName'), 'Microsoft.Network/virtualNetworks', parameters('vnetName')), '/subnets/', parameters('vnetSubnetName'))]"
                     },
                     "publicIPAddress": {
-                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('clusterName'), '-', parameters('roleType'), '-pip', copyIndex()))]"
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('clusterName'), '-', parameters('roleType'), '-pip', copyIndex()))]"
                     } 
                 }
             }

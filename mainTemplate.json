@@ -11,7 +11,10 @@
     },
     "clusterName": {
       "type": "string"
-    },    
+    },
+    "mds": {
+      "type": "int"
+    },
     "dataNodeCount": {
       "type": "int"
     },
@@ -125,7 +128,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(variables('scriptUri'), '/role.json')]",
+          "uri": "[concat(variables('scriptUri'), '/role_', parameters('mds'), '.json')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
@@ -193,7 +196,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(variables('scriptUri'), '/role.json')]",
+          "uri": "[concat(variables('scriptUri'), '/role_', parameters('mds'), '.json')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
@@ -261,7 +264,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(variables('scriptUri'), '/role.json')]",
+          "uri": "[concat(variables('scriptUri'), '/role_1.json')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {

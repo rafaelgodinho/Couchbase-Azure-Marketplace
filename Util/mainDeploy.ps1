@@ -38,3 +38,5 @@ Set-AzureStorageBlobContent -File "UI\createUiDefinition.json" -Container $stora
 
 #UI test URL
 #https://portal.azure.com/#blade/Microsoft_Azure_Compute/CreateMultiVmWizardBlade/internal_bladeCallId/anything/internal_bladeCallerParams/{"initialData":{},"providerConfig":{"createUiDefinition":"https%3A%2F%2Frgcb.blob.core.windows.net%2Fdeployrg%2FcreateUiDefinition.json"}}
+#GitHub UI Url
+#https://portal.azure.com/#blade/Microsoft_Azure_Compute/CreateMultiVmWizardBlade/internal_bladeCallId/anything/internal_bladeCallerParams/{"initialData":{},"providerConfig":{"createUiDefinition":"https%3A%2F%2Fraw.githubusercontent.com%2Frafaelgodinho%2FCouchbase-Azure-Marketplace%2Fmaster%2FUI%2FcreateUiDefinition.json"}}
