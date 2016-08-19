@@ -7,7 +7,7 @@
         },
         "vmSize" : {
             "type": "string",
-            "defaultValue": "Standard_A0"
+            "defaultValue": "Standard_A3"
         },
         "storageAccountBasename": {
             "type": "string"
@@ -60,9 +60,9 @@
         }
     },
     "variables": {
-        "imagePublisher" : "Canonical",
-        "imageOffer" : "UbuntuServer",
-        "imageSKU" : "12.04.5-LTS",
+        "imagePublisher" : "couchbase",
+        "imageOffer" : "couchbase-server-40-community",
+        "imageSKU" : "cbs_40_ce",
         "imageVersion": "latest",
         "storageAccountName": "[concat(parameters('storageAccountBaseName'), div(parameters('nodeIndex'), parameters('numberOfNodesPerStorageAccount')))]",
         "sizeOfEachDataDiskInGB": 1023,
@@ -1375,6 +1375,11 @@
         "type": "Microsoft.Compute/virtualMachines",
         "name": "[parameters('vmName')]",
         "location": "[parameters('location')]",
+        "plan": {
+            "name": "[variables('imageSku')]",
+            "publisher": "[variables('imagePublisher')]",
+            "product": "[variables('imageOffer')]"
+        },
         "properties": {
             "availabilitySet": {
                 "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySetName'))]"

@@ -13,7 +13,8 @@
       "type": "string"
     },
     "mds": {
-      "type": "int"
+      "type": "int",
+      "defaultValue": 0
     },
     "dataNodeCount": {
       "type": "int"
@@ -330,6 +331,41 @@
           }
         }
       }
-    }
+    },
+    {
+      "name": "[concat(parameters('clusterName'), '-scripts')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "properties": {
+          "mode": "Incremental",
+          "templateLink": {
+          "uri": "[concat(variables('scriptUri'), '/scripts.json')]",
+          "contentVersion": "1.0.0.0"
+          },
+          "parameters": {
+            "dataNodeCount": {
+              "value": "[parameters('dataNodeCount')]"
+            },
+            "clusterName": {
+              "value": "[parameters('clusterName')]"
+            },
+            "cbPassword": {
+              "value": "[parameters('cbPassword')]"
+            },
+            "cbUsername": {
+              "value": "[parameters('cbUsername')]"
+            },
+            "vmBasename": {
+              "value": "data"
+            },    
+            "location": {
+              "value": "[parameters('location')]"
+            },
+            "scriptUri": {
+              "value": "[variables('scriptUri')]"
+            }
+          }
+      }
+    }    
   ]
 }
