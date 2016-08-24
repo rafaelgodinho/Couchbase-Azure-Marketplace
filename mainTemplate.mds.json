@@ -12,13 +12,33 @@
     "clusterName": {
       "type": "string"
     },
-   "dataNodeCount": {
+    "mds": {
+      "type": "int",
+      "defaultValue": 0
+    },
+    "dataNodeCount": {
       "type": "int"
     },
-   "dataVmSize": {
+    "queryNodeCount": {
+      "type": "int",
+      "defaultValue": 0
+    },
+    "indexNodeCount": {
+      "type": "int",
+      "defaultValue": 0
+    },
+    "dataVmSize": {
       "type": "string"
     },
-   "cbUsername": {
+    "queryVmSize": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "indexVmSize": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "cbUsername": {
       "type": "securestring"
     },
     "cbPassword": {
@@ -108,7 +128,143 @@
           }
       }
     },
-   {
+    {
+      "name": "[concat(parameters('clusterName'), 'i')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', parameters('clusterName'), '-vnet')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('scriptUri'), '/role_', parameters('mds'), '.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "nodeCount": {
+            "value": "[parameters('indexNodeCount')]"
+          },
+          "vmSize": {
+            "value": "[parameters('indexVmSize')]"
+          },
+          "clusterName": {
+            "value": "[parameters('clusterName')]"
+          },
+          "adminUsername": {
+            "value": "[parameters('adminUsername')]"
+          },
+          "adminPassword": {
+            "value": "[parameters('adminPassword')]"
+          },
+          "sshKey": {
+            "value": "[parameters('sshKey')]"
+          },
+          "authenticationType": {
+            "value": "[parameters('authenticationType')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "scriptUri": {
+            "value": "[variables('scriptUri')]"
+          },
+          "storageAccountBasename": {
+              "value": "[variables('storageAccountBasename')]"
+          },
+          "roleType": {
+              "value" : "i"
+          },
+          "vmBasename": {
+              "value": "index"
+          },
+          "ipOffset": {
+            "value": "[add(parameters('dataNodeCount'), parameters('queryNodeCount'))]"
+          },
+         "vnetName": {
+            "value": "[parameters('vnetName')]"
+          },
+          "vnetSubnetName": {
+            "value": "[parameters('vnetSubnetName')]"
+          },
+          "vnetStartAddress": {
+            "value": "[parameters('vnetStartAddress')]"
+          },
+          "vnetRGName": {
+            "value": "[parameters('vnetRGName')]"
+          }
+        }
+      }
+    },
+    {
+      "name": "[concat(parameters('clusterName'), 'q')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', parameters('clusterName'), '-vnet')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('scriptUri'), '/role_', parameters('mds'), '.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "nodeCount": {
+            "value": "[parameters('queryNodeCount')]"
+          },
+          "vmSize": {
+            "value": "[parameters('queryVmSize')]"
+          },
+          "clusterName": {
+            "value": "[parameters('clusterName')]"
+          },
+          "adminUsername": {
+            "value": "[parameters('adminUsername')]"
+          },
+          "adminPassword": {
+            "value": "[parameters('adminPassword')]"
+          },
+          "sshKey": {
+            "value": "[parameters('sshKey')]"
+          },
+          "authenticationType": {
+            "value": "[parameters('authenticationType')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "scriptUri": {
+            "value": "[variables('scriptUri')]"
+          },
+          "storageAccountBasename": {
+              "value": "[variables('storageAccountBasename')]"
+          },
+          "roleType": {
+              "value" : "q"
+          },
+          "vmBasename": {
+              "value": "query"
+          },
+          "ipOffset": {
+            "value": "[parameters('dataNodeCount')]"
+          },
+         "vnetName": {
+            "value": "[parameters('vnetName')]"
+          },
+          "vnetSubnetName": {
+            "value": "[parameters('vnetSubnetName')]"
+          },
+          "vnetStartAddress": {
+            "value": "[parameters('vnetStartAddress')]"
+          },
+          "vnetRGName": {
+            "value": "[parameters('vnetRGName')]"
+          }
+        }
+      }
+    },
+    {
       "name": "[concat(parameters('clusterName'), 'd')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",

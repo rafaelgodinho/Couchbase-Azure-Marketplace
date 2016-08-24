@@ -16,7 +16,9 @@ azure group create --name $newResourceGroupName --location $location
 
 # Validate template
 templateUri="https://$storageAccountName.blob.core.windows.net/$containerName/mainTemplate.json"
-parametersFiles="./Params/mainTemplate.mds.password.newVNet.parameters.json ./Params/mainTemplate.nonMds.password.newVNet.parameters.json"
+#parametersFiles="./Params/mainTemplate.mds.password.newVNet.parameters.json ./Params/mainTemplate.nonMds.password.newVNet.parameters.json"
+parametersFiles="./Params/mainTemplate.nonMds.password.newVNet.parameters.json"
+
 
 for param in $parametersFiles
 do
