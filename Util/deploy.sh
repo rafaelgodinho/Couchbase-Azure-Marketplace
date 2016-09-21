@@ -9,7 +9,7 @@ storageAccountName="rgcb"
 containerName="deployrg"
 
 # Create Resource Group
-newResourceGroupName="rgcb1234"
+newResourceGroupName="rgcb97"
 location="westus"
 
 azure group create --name $newResourceGroupName --location $location
@@ -21,7 +21,7 @@ templateUri="https://$storageAccountName.blob.core.windows.net/$containerName/ma
 #   - ./Params/mainTemplate.mds.password.newVNet.parameters.json
 #   - ./Params/mainTemplate.nonMds.password.newVNet.parameters.json
 #   - ./Params/UIOutput.json
-parametersFile="./Params/UIOutput.json"
+parametersFile="./Params/mainTemplate.nonMds.password.newVNet.parameters.json"
 deploymentName="deploy$newResourceGroupName"
 
 echo "Deploying $parametersFile"

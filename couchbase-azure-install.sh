@@ -63,7 +63,10 @@ ADMINISTRATOR=""
 PASSWORD=""
 # Minimum VM size we are assuming is A2, which has 3.5GB, 2800MB is about 80% as recommended
 TOTAL_RAM=$(grep MemTotal /proc/meminfo | awk '{print $2}')
-RAM_FOR_COUCHBASE=.8 \* $TOTAL_RAM
+RAM_FOR_COUCHBASE=$((70 * $TOTAL_RAM))
+DATA_RAM_FOR_COUCHBASE=$(($RAM_FOR_COUCHBASE / 100000))
+RAM_FOR_COUCHBASE=$((20 * $TOTAL_RAM))
+INDEX_RAM_FOR_COUCHBASE=$(($RAM_FOR_COUCHBASE / 100000))
 IS_LAST_NODE=0
 
 #Process the received arguments
@@ -82,12 +85,12 @@ while getopts d:n:i:a:p:l optname; do
     a) #Adminsitrator name
       ADMINISTRATOR=${OPTARG}
       ;; 
-	p) #Password for the admin
-	  PASSWORD=${OPTARG}
-	  ;;         
-	l) #is this for the last node?
-	  IS_LAST_NODE=1
-	  ;;        	  
+p) #Password for the admin
+  PASSWORD=${OPTARG}
+  ;;         
+l) #is this for the last node?
+  IS_LAST_NODE=1
+  ;;          
   esac
 done
 # install_cb is removed as we install from template and  CB image azure market place 
@@ -114,36 +117,70 @@ for (( n=0 ; n<("${HOST_IPS[1]}"+0) ; n++))
 do
   HOST="${HOST_IPS[0]}${n}"
   if ! [[ "${MY_IPS[@]}" =~ "${HOST}" ]]; then
-      MEMBER_IP_ADDRESSES+=($HOST)
-  else
-		MY_IP="${HOST}"
+      hostlookup=$(nslookup "$HOST" | grep Name: | awk '{print $2}')
+      MEMBER_IP_ADDRESSES+=($hostlookup)
   fi
 done
 
+
+myhostname=$(hostname -f)
+MY_IP=$(nslookup "$myhostname" | grep Name: | awk '{print $2}')
+echo "last node IP", $MY_IP
+
+KNOWN_NODES=
 log "Is last node? ${IS_LAST_NODE}"
 if [ "$IS_LAST_NODE" -eq 1 ]; then
-	log "sleep for 4 minutes to wait for the environment to stabilize"
-	sleep 4m
 
-	log "Initializing the first node of the cluster on ${MY_IP}." 
-	/opt/couchbase/bin/couchbase-cli node-init -c "$MY_IP":8091 --node-init-data-path="${COUCHBASE_DATA}" -u "${ADMINISTRATOR}" -p "${PASSWORD}"
+  echo "setting service" 
+  curl -v http://$MY_IP:8091/node/controller/setupServices -d services=kv%2Cn1ql%2Cindex 
 
-	log "Setting up cluster with all services - data,index,query on each node"
-	/opt/couchbase/bin/couchbase-cli cluster-init -c "$MY_IP":8091  -u "${ADMINISTRATOR}" -p "${PASSWORD}" --cluster-init-port=8091 --cluster-init-ramsize="${RAM_FOR_COUCHBASE}" --services="data,index,query" --cluster-index-ramsize="${RAM_FOR_COUCHBASE}"
+  curl -v http://$MY_IP:8091/pools/default -d memoryQuota=$DATA_RAM_FOR_COUCHBASE -d indexMemoryQuota=$INDEX_RAM_FOR_COUCHBASE  
 
-	log "Setting autofailover on and timeout to 30 seconds"
-	/opt/couchbase/bin/couchbase-cli setting-autofailover  -c "$MY_IP":8091  -u "${ADMINISTRATOR}" -p "${PASSWORD}" --enable-auto-failover=1 --auto-failover-timeout=30
+ echo "setting data path"
+ curl -v  http://$MY_IP:8091/nodes/self/controller/settings -d path=$COUCHBASE_DATA
 
-	for (( i = 0; i < ${#MEMBER_IP_ADDRESSES[@]}; i++ )); do
-		log "Initializing the node of the cluster on ${MEMBER_IP_ADDRESSES[$i]}."
-		/opt/couchbase/bin/couchbase-cli node-init -c "${MEMBER_IP_ADDRESSES[$i]}":8091 --node-init-data-path="${COUCHBASE_DATA}" -u "${ADMINISTRATOR}" -p "${PASSWORD}"
-		
-		log "Adding node ${MEMBER_IP_ADDRESSES[$i]} to cluster"
-		/opt/couchbase/bin/couchbase-cli server-add -c "$MY_IP":8091 -u "${ADMINISTRATOR}" -p "${PASSWORD}" --server-add="${MEMBER_IP_ADDRESSES[$i]}" --services="data,index,query" --server-add-username="${ADMINISTRATOR}" --server-add-password="${PASSWORD}"
-		log "Done adding node"
-	done
+  curl -v http://$MY_IP:8091/pools/default -d memoryQuota=$DATA_RAM_FOR_COUCHBASE -d indexMemoryQuota=$INDEX_RAM_FOR_COUCHBASE
 
-	log "Reblancing the cluster"
-	/opt/couchbase/bin/couchbase-cli rebalance -c "$MY_IP":8091 -u "${ADMINISTRATOR}" -p "${PASSWORD}"
+  echo "setting username password"
+  curl -v http://$MY_IP:8091/settings/web -d port=8091 -d username=${ADMINISTRATOR} -d password=${PASSWORD}
+
+
+  echo "setting Memory Quota"
+  curl -v -u ${ADMINISTRATOR}:${PASSWORD}  -X POST http://$MY_IP:8091/pools/default -d memoryQuota=$DATA_RAM_FOR_COUCHBASE -d indexMemoryQuota=$INDEX_RAM_FOR_COUCHBASE
+
+  
+  echo "setting failover"
+  curl -i -u ${ADMINISTRATOR}:${PASSWORD} http://$MY_IP:8091/settings/autoFailover -d 'enabled=true&timeout=600'
+
+ echo "renaming cluster"
+ curl -v -X POST -u  ${ADMINISTRATOR}:${PASSWORD}  http://$MY_IP:8091/node/controller/rename -d hostname=$MY_IP
+
+for (( i = 0; i < ${#MEMBER_IP_ADDRESSES[@]}; i++ )); do
+
+    WORKER_IP=${MEMBER_IP_ADDRESSES[$i]}
+    PARAMETER="hostname=${WORKER_IP}:8091&user=${ADMINISTRATOR}&password=${PASSWORD}"
+    echo "Initializing the node of the cluster on ${MEMBER_IP_ADDRESSES[$i]}."
+
+   curl -v http://${MEMBER_IP_ADDRESSES[$i]}:8091/node/controller/setupServices -d services=kv%2Cn1ql%2Cindex
+
+   echo "setting data path"
+   curl -v http://${MEMBER_IP_ADDRESSES[$i]}:8091/nodes/self/controller/settings -d path=$COUCHBASE_DATA
+
+   echo "setting username password on other nodes"
+   curl -v http://${MEMBER_IP_ADDRESSES[$i]}:8091/settings/web -d port=8091 -d username=${ADMINISTRATOR} -d password=${PASSWORD}  
+
+    sleep 60
+    echo " Adding Node"
+    COMMAND=$(echo curl -u ${ADMINISTRATOR}:${PASSWORD} "http://$MY_IP:8091/controller/addNode" -d ${PARAMETER})
+    echo ${COMMAND}
+    ${COMMAND}
+
+KNOWN_NODES="ns_1@"$(echo ${MEMBER_IP_ADDRESSES[$i]}),${KNOWN_NODES}
+echo "Done adding node"
+done
+
+log "Reblancing the cluster"
+  sleep 60
+  /opt/couchbase/bin/couchbase-cli rebalance -c "$MY_IP":8091 -u "${ADMINISTRATOR}" -p "${PASSWORD}"
 fi
-log "Install & Setup for couchbase complete!"
+echo "Install & Setup for couchbase complete!"

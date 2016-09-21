@@ -31,10 +31,6 @@
         }
     },
     "variables": {
-        "ipOct": "[split(parameters('vnetStartAddress'), '.')]",
-        "ipOct01": "[concat(variables('ipOct')[0], '.', variables('ipOct')[1], '.')]",
-        "ipOct2": "[int(variables('ipOct')[2])]",
-        "ipOct3": "[add(parameters('ipOffset'), int(variables('ipOct')[3]))]"
     },
     "resources": [
     {
@@ -67,8 +63,7 @@
             {
                 "name": "ipconfig1",
                 "properties": {
-                    "privateIPAllocationMethod": "Static",
-                    "privateIPAddress": "[concat(variables('ipOct01'), add(variables('ipOct2'), div(copyIndex(variables('ipOct3')), 256)), '.', mod(copyIndex(variables('ipOct3')), 256))]",
+                    "privateIPAllocationMethod": "Dynamic",
                     "subnet": {
                         "id": "[concat(resourceId(parameters('vnetRGName'), 'Microsoft.Network/virtualNetworks', parameters('vnetName')), '/subnets/', parameters('vnetSubnetName'))]"
                     },

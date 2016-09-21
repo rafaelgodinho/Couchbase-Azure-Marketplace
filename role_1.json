@@ -59,7 +59,13 @@
         },
         "vnetRGName": {
             "type": "string"
-        }
+        },
+		"offer": {
+			"type": "string"
+		},
+		"sku": {
+			"type": "string"
+		}
 	},
 	"variables": {
 		"numberOfDataDisks": 0,
@@ -334,7 +340,13 @@
 				},
 				"numberOfNodesPerStorageAccount": {
 					"value": "[variables('numberOfNodesPerStorageAccount')]"
-				}
+				},
+				"offer": {
+					"value": "[parameters('offer')]"
+				},
+				"sku": {
+					"value": "[parameters('sku')]"
+				}				
 			}
 		}
 	}]

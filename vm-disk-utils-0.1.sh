@@ -298,8 +298,11 @@ create_striped_volume()
 check_mdadm() {
     dpkg -s mdadm >/dev/null 2>&1
     if [ ${?} -ne 0 ]; then
+        log "*** RG *** Before update"
         (apt-get -y update || (sleep 15; apt-get -y update)) > /dev/null
-        DEBIAN_FRONTEND=noninteractive sudo apt-get -y install mdadm --fix-missing
+        log "*** RG *** After update"
+        DEBIAN_FRONTEND=noninteractive sudo apt-get -y -q install mdadm --fix-missing
+        log "*** RG *** mdadm"
     fi
 }
 

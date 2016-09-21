@@ -19,8 +19,7 @@
             "type": "securestring"
         },
         "adminPassword": {
-            "type": "securestring",
-            "defaultValue": ""
+            "type": "securestring"
         },
         "sshKey": {
             "defaultValue": "",
@@ -57,12 +56,18 @@
         },
         "numberOfNodesPerStorageAccount": {
             "type": "int"
-        }
+        },
+        "offer": {
+          "type": "string"
+        },
+        "sku": {
+          "type": "string"
+        }        
     },
     "variables": {
         "imagePublisher" : "couchbase",
-        "imageOffer" : "couchbase-server-40-community",
-        "imageSKU" : "cbs_40_ce",
+        "imageOffer" : "[parameters('offer')]",
+        "imageSKU" : "[parameters('sku')]",
         "imageVersion": "latest",
         "storageAccountName": "[concat(parameters('storageAccountBaseName'), div(parameters('nodeIndex'), parameters('numberOfNodesPerStorageAccount')))]",
         "sizeOfEachDataDiskInGB": 1023,
@@ -1374,12 +1379,12 @@
         "apiVersion": "2015-06-15",
         "type": "Microsoft.Compute/virtualMachines",
         "name": "[parameters('vmName')]",
-        "location": "[parameters('location')]",
         "plan": {
-            "name": "[variables('imageSku')]",
             "publisher": "[variables('imagePublisher')]",
-            "product": "[variables('imageOffer')]"
-        },
+            "product": "[variables('imageOffer')]",
+            "name": "[variables('imageSku')]"
+        },        
+        "location": "[parameters('location')]",
         "properties": {
             "availabilitySet": {
                 "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySetName'))]"

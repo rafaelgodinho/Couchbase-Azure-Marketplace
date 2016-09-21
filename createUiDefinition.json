@@ -16,6 +16,30 @@
           "constraints": {
             "required": true
           }
+        },
+        {
+          "name": "couchbaseVersion",
+          "type": "Microsoft.Common.DropDown",
+          "label": "Couchbase Version",
+          "defaultValue": "4.0 Community Edition",
+          "toolTip": "",
+          "constraints": {
+            "allowedValues": [
+              {
+                "label": "4.0 Community Edition",
+                "value": "couchbase-server-40-community |cbs_40_ce" //Space added between offer and sku to keep the length of 30 chars for the offer. Pipe char ("|") is used to improve readbility
+              },
+              {
+                "label": "4.5 Enterprise Edition - Silver",
+                "value": "couchbase-server-40-enterprise|cbs_40_ee_silver"
+              },
+              {
+                "label": "4.5 Enterprise Edition - Gold",
+                "value": "couchbase-server-40-enterprise|cbs_40_ee_gold"
+              }              
+            ]
+          },
+          "visible": true
         }
       ]
     }       
@@ -86,6 +110,11 @@
               ]
             },
             "osPlatform": "Linux",
+            "imageReference": {
+                "publisher": "couchbase",
+                "offer": "[replace(take(basics('Basics').couchbaseVersion, 30), ' ', '')]",
+                "sku": "[skip(basics('Basics').couchbaseVersion, 31)]"
+              },
             "count": "[steps('nodeConfig').dataNodeCount]"
           }
         ]
@@ -240,6 +269,8 @@
       "vnetSubnetName": "[steps('networkInfo').vnetSelector.subnets.subnet1.name]",
       "vnetSubnetAddressPrefix": "[steps('networkInfo').vnetSelector.subnets.subnet1.addressPrefix]",
       "vnetStartAddress": "[steps('networkInfo').vnetSelector.subnets.subnet1.startAddress]",
+      "offer": "[replace(take(basics('Basics').couchbaseVersion, 30), ' ', '')]",
+      "sku": "[skip(basics('Basics').couchbaseVersion, 31)]",
       "location" : "[location()]"
     }
   }

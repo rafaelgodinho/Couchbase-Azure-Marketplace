@@ -8,13 +8,14 @@ azure account set $subscriptionId
 storageAccountResourceGroupName="rgcb"
 storageAccountName="rgcb"
 containerName="deployrg"
-storageAccountKey=$(azure storage account keys list $storageAccountName --resource-group $storageAccountResourceGroupName --json | jq .[0].value | tr -d '"')
+#storageAccountKey=$(azure storage account keys list $storageAccountName --resource-group $storageAccountResourceGroupName --json | jq .[0].value | tr -d '"')
+storageAccountKey=$(azure storage account keys list $storageAccountName --resource-group $storageAccountResourceGroupName | grep key1 | awk '{print $3}')
 
 for f in *.*
 do
     # Upload all the files from the current folder to an Azure storage container
     echo "Uploading $f"
-    azure storage blob upload --blobtype block --blob $f --file $f --container $containerName --account-name $storageAccountName --account-key $storageAccountKey --quiet
+    azure storage blob upload --blobtype block --blob $f --file $f --container $containerName --account-name $storageAccountName --account-key $storageAccountKey --concurrenttaskcount 100 --quiet
 done
 
 #https://rgcb.blob.core.windows.net/deployrg/createUiDefinition.json

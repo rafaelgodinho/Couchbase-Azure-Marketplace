@@ -70,6 +70,12 @@
     "vnetRGName": {
         "type": "string"
     },
+    "offer": {
+      "type": "string"
+    },
+    "sku": {
+      "type": "string"
+    },
     "location": {
       "type": "string"
     }
@@ -172,6 +178,12 @@
           },
           "vnetRGName": {
             "value": "[parameters('vnetRGName')]"
+          },
+          "offer": {
+            "value": "[parameters('offer')]"
+          },
+          "sku": {
+            "value": "[parameters('sku')]"
           }
         }
       }
@@ -180,6 +192,9 @@
       "name": "[concat(parameters('clusterName'), '-scripts')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', parameters('clusterName'), 'd')]"
+      ],      
       "properties": {
           "mode": "Incremental",
           "templateLink": {
