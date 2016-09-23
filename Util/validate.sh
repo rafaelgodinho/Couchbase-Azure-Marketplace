@@ -1,6 +1,8 @@
 #!/bin/bash
 clear
 
+startTime=$(date)
+
 azure config mode arm
 subscriptionId="f1766062-4c0b-4112-b926-2508fecc5bdf"
 azure account set $subscriptionId
@@ -25,3 +27,8 @@ do
     echo "Testing $param"
     azure group template validate --resource-group $newResourceGroupName --template-uri $templateUri --parameters-file $param
 done
+
+endTime=$(date)
+
+echo "Start time: $startTime"
+echo "End time: $endTime"

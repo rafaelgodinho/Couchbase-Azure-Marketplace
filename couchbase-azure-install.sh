@@ -113,7 +113,9 @@ IFS='-' read -a HOST_IPS <<< "$IP_LIST"
 declare -a MY_IPS=`ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'`
 MY_IP=""
 declare -a MEMBER_IP_ADDRESSES=()
-for (( n=0 ; n<("${HOST_IPS[1]}"+0) ; n++))
+#for (( n=0 ; n<("${HOST_IPS[1]}"+0) ; n++))
+#Skip last node since this part of script will be executed from it
+for (( n=0 ; n<("${HOST_IPS[1]}"+0) -1 ; n++))
 do
   HOST="${HOST_IPS[0]}${n}"
   if ! [[ "${MY_IPS[@]}" =~ "${HOST}" ]]; then
@@ -169,7 +171,7 @@ for (( i = 0; i < ${#MEMBER_IP_ADDRESSES[@]}; i++ )); do
    echo "setting username password on other nodes"
    curl -v http://${MEMBER_IP_ADDRESSES[$i]}:8091/settings/web -d port=8091 -d username=${ADMINISTRATOR} -d password=${PASSWORD}  
 
-    sleep 60
+    #sleep 60
     echo " Adding Node"
     COMMAND=$(echo curl -u ${ADMINISTRATOR}:${PASSWORD} "http://$MY_IP:8091/controller/addNode" -d ${PARAMETER})
     echo ${COMMAND}
@@ -179,8 +181,8 @@ KNOWN_NODES="ns_1@"$(echo ${MEMBER_IP_ADDRESSES[$i]}),${KNOWN_NODES}
 echo "Done adding node"
 done
 
-log "Reblancing the cluster"
-  sleep 60
+  log "Reblancing the cluster"
+  #sleep 60
   /opt/couchbase/bin/couchbase-cli rebalance -c "$MY_IP":8091 -u "${ADMINISTRATOR}" -p "${PASSWORD}"
 fi
 echo "Install & Setup for couchbase complete!"

@@ -1,6 +1,8 @@
 #!/bin/bash
 clear
 
+startTime=$(date)
+
 azure config mode arm
 subscriptionId="f1766062-4c0b-4112-b926-2508fecc5bdf"
 azure account set $subscriptionId
@@ -26,3 +28,8 @@ deploymentName="deploy$newResourceGroupName"
 
 echo "Deploying $parametersFile"
 azure group deployment create --resource-group $newResourceGroupName --template-uri $templateUri --parameters-file $parametersFile --name $deploymentName
+
+endTime=$(date)
+
+echo "Start time: $startTime"
+echo "End time: $endTime"

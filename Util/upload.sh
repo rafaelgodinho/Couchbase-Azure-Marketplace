@@ -1,6 +1,8 @@
 #!/bin/bash
 clear
 
+startTime=$(date)
+
 azure config mode arm
 subscriptionId="f1766062-4c0b-4112-b926-2508fecc5bdf"
 azure account set $subscriptionId
@@ -17,6 +19,11 @@ do
     echo "Uploading $f"
     azure storage blob upload --blobtype block --blob $f --file $f --container $containerName --account-name $storageAccountName --account-key $storageAccountKey --concurrenttaskcount 100 --quiet
 done
+
+endTime=$(date)
+
+echo "Start time: $startTime"
+echo "End time: $endTime"
 
 #https://rgcb.blob.core.windows.net/deployrg/createUiDefinition.json
 #https%3A%2F%2Frgcb.blob.core.windows.net%2Fdeployrg%2FcreateUiDefinition.json
