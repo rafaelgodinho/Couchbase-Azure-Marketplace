@@ -3,10 +3,10 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "storageAccountBasename": {
-            "type" : "string"
+            "type": "string"
         },
         "location": {
-            "type" : "string"
+            "type": "string"
         },
         "numberOfStorageAccounts": {
             "type": "int"
@@ -20,16 +20,18 @@
         {
             "type": "Microsoft.Storage/storageAccounts",
             "name": "[concat(parameters('storageAccountBasename'), copyIndex())]",
-            "apiVersion": "2015-06-15",
+            "apiVersion": "2016-01-01",
             "location": "[parameters('location')]",
+            "properties": {},
+            "sku": {
+                "name": "[parameters('storageAccountType')]"
+            },
+            "kind": "Storage",
             "copy": {
                 "name": "storageAccountLoop",
                 "count": "[parameters('numberOfStorageAccounts')]"
-            },
-            "properties": {
-                "accountType": "[parameters('storageAccountType')]"
             }
         }
     ],
-    "outputs" : {}
+    "outputs": {}
 }

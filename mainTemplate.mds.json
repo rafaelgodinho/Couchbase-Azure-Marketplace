@@ -44,7 +44,7 @@
     "cbPassword": {
       "type": "securestring",
       "defaultValue": ""
-    },    
+    },
     "adminUsername": {
       "type": "securestring"
     },
@@ -72,23 +72,23 @@
       ]
     },
     "vnetName": {
-        "type": "string"
+      "type": "string"
     },
     "vnetSubnetName": {
-        "type": "string"
+      "type": "string"
     },
     "vnetAddressPrefix": {
-        "type": "string",
-        "defaultValue": ""
+      "type": "string",
+      "defaultValue": ""
     },
     "vnetSubnetAddressPrefix": {
-        "type": "string"
+      "type": "string"
     },
     "vnetStartAddress": {
-        "type": "string"
+      "type": "string"
     },
     "vnetRGName": {
-        "type": "string"
+      "type": "string"
     },
     "location": {
       "type": "string"
@@ -102,36 +102,36 @@
     {
       "name": "[concat(parameters('clusterName'), '-vnet')]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
+      "apiVersion": "2016-02-01",
       "properties": {
-          "mode": "Incremental",
-          "templateLink": {
+        "mode": "Incremental",
+        "templateLink": {
           "uri": "[concat(variables('scriptUri'), '/vnet_', parameters('vnetNewOrExisting'), '.json')]",
           "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "vnetName": {
+            "value": "[parameters('vnetName')]"
           },
-          "parameters": {
-              "vnetName": {
-                  "value": "[parameters('vnetName')]"
-              },
-              "vnetAddressPrefix": {
-                  "value": "[parameters('vnetAddressPrefix')]"
-              },
-              "vnetSubnetName": {
-                  "value": "[parameters('vnetSubnetName')]"
-              },
-              "vnetSubnetAddressPrefix": {
-                  "value": "[parameters('vnetSubnetAddressPrefix')]"
-              },
-              "location": {
-                  "value": "[parameters('location')]"
-              }
+          "vnetAddressPrefix": {
+            "value": "[parameters('vnetAddressPrefix')]"
+          },
+          "vnetSubnetName": {
+            "value": "[parameters('vnetSubnetName')]"
+          },
+          "vnetSubnetAddressPrefix": {
+            "value": "[parameters('vnetSubnetAddressPrefix')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
           }
+        }
       }
     },
     {
       "name": "[concat(parameters('clusterName'), 'i')]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
+      "apiVersion": "2016-02-01",
       "dependsOn": [
         "[concat('Microsoft.Resources/deployments/', parameters('clusterName'), '-vnet')]"
       ],
@@ -170,18 +170,18 @@
             "value": "[variables('scriptUri')]"
           },
           "storageAccountBasename": {
-              "value": "[variables('storageAccountBasename')]"
+            "value": "[variables('storageAccountBasename')]"
           },
           "roleType": {
-              "value" : "i"
+            "value": "i"
           },
           "vmBasename": {
-              "value": "index"
+            "value": "index"
           },
           "ipOffset": {
             "value": "[add(parameters('dataNodeCount'), parameters('queryNodeCount'))]"
           },
-         "vnetName": {
+          "vnetName": {
             "value": "[parameters('vnetName')]"
           },
           "vnetSubnetName": {
@@ -199,7 +199,7 @@
     {
       "name": "[concat(parameters('clusterName'), 'q')]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
+      "apiVersion": "2016-02-01",
       "dependsOn": [
         "[concat('Microsoft.Resources/deployments/', parameters('clusterName'), '-vnet')]"
       ],
@@ -238,18 +238,18 @@
             "value": "[variables('scriptUri')]"
           },
           "storageAccountBasename": {
-              "value": "[variables('storageAccountBasename')]"
+            "value": "[variables('storageAccountBasename')]"
           },
           "roleType": {
-              "value" : "q"
+            "value": "q"
           },
           "vmBasename": {
-              "value": "query"
+            "value": "query"
           },
           "ipOffset": {
             "value": "[parameters('dataNodeCount')]"
           },
-         "vnetName": {
+          "vnetName": {
             "value": "[parameters('vnetName')]"
           },
           "vnetSubnetName": {
@@ -267,7 +267,7 @@
     {
       "name": "[concat(parameters('clusterName'), 'd')]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
+      "apiVersion": "2016-02-01",
       "dependsOn": [
         "[concat('Microsoft.Resources/deployments/', parameters('clusterName'), '-vnet')]"
       ],
@@ -306,18 +306,18 @@
             "value": "[variables('scriptUri')]"
           },
           "storageAccountBasename": {
-              "value": "[variables('storageAccountBasename')]"
+            "value": "[variables('storageAccountBasename')]"
           },
           "roleType": {
-              "value" : "d"
+            "value": "d"
           },
           "vmBasename": {
-              "value": "data"
+            "value": "data"
           },
           "ipOffset": {
             "value": 0
           },
-         "vnetName": {
+          "vnetName": {
             "value": "[parameters('vnetName')]"
           },
           "vnetSubnetName": {
@@ -335,37 +335,37 @@
     {
       "name": "[concat(parameters('clusterName'), '-scripts')]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
+      "apiVersion": "2016-02-01",
       "properties": {
-          "mode": "Incremental",
-          "templateLink": {
+        "mode": "Incremental",
+        "templateLink": {
           "uri": "[concat(variables('scriptUri'), '/scripts.json')]",
           "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "dataNodeCount": {
+            "value": "[parameters('dataNodeCount')]"
           },
-          "parameters": {
-            "dataNodeCount": {
-              "value": "[parameters('dataNodeCount')]"
-            },
-            "clusterName": {
-              "value": "[parameters('clusterName')]"
-            },
-            "cbPassword": {
-              "value": "[parameters('cbPassword')]"
-            },
-            "cbUsername": {
-              "value": "[parameters('cbUsername')]"
-            },
-            "vmBasename": {
-              "value": "data"
-            },    
-            "location": {
-              "value": "[parameters('location')]"
-            },
-            "scriptUri": {
-              "value": "[variables('scriptUri')]"
-            }
+          "clusterName": {
+            "value": "[parameters('clusterName')]"
+          },
+          "cbPassword": {
+            "value": "[parameters('cbPassword')]"
+          },
+          "cbUsername": {
+            "value": "[parameters('cbUsername')]"
+          },
+          "vmBasename": {
+            "value": "data"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "scriptUri": {
+            "value": "[variables('scriptUri')]"
           }
+        }
       }
-    }    
+    }
   ]
 }
