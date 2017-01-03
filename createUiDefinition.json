@@ -27,7 +27,7 @@
             "allowedValues": [
               {
                 "label": "4.0 Community Edition",
-                "value": "couchbase-server-40-community |cbs_40_ce" //Space added between offer and sku to keep the length of 30 chars for the offer. Pipe char ("|") is used to improve readbility
+                "value": "couchbase-server-40-community |cbs_40_ce"
               },
               {
                 "label": "4.5 Enterprise Edition - Silver",

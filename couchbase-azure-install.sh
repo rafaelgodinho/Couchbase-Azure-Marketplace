@@ -63,7 +63,7 @@ ADMINISTRATOR=""
 PASSWORD=""
 # Minimum VM size we are assuming is A2, which has 3.5GB, 2800MB is about 80% as recommended
 TOTAL_RAM=$(grep MemTotal /proc/meminfo | awk '{print $2}')
-RAM_FOR_COUCHBASE=$((70 * $TOTAL_RAM))
+RAM_FOR_COUCHBASE=$((60 * $TOTAL_RAM))
 DATA_RAM_FOR_COUCHBASE=$(($RAM_FOR_COUCHBASE / 100000))
 RAM_FOR_COUCHBASE=$((20 * $TOTAL_RAM))
 INDEX_RAM_FOR_COUCHBASE=$(($RAM_FOR_COUCHBASE / 100000))
@@ -131,58 +131,20 @@ echo "last node IP", $MY_IP
 
 KNOWN_NODES=
 log "Is last node? ${IS_LAST_NODE}"
+
+echo "USER_NAME", $ADMINISTRATOR >> /tmp/instances.txt
+echo "PASSWORD", $PASSWORD >> /tmp/instances.txt
+echo "DATA_PATH", $COUCHBASE_DATA >> /tmp/instances.txt
+echo "INDEX_QUOTA", $INDEX_RAM_FOR_COUCHBASE >> /tmp/instances.txt
+echo "DATA_QUOTA", $DATA_RAM_FOR_COUCHBASE >> /tmp/instances.txt
+
 if [ "$IS_LAST_NODE" -eq 1 ]; then
-
-  echo "setting service" 
-  curl -v http://$MY_IP:8091/node/controller/setupServices -d services=kv%2Cn1ql%2Cindex 
-
-  curl -v http://$MY_IP:8091/pools/default -d memoryQuota=$DATA_RAM_FOR_COUCHBASE -d indexMemoryQuota=$INDEX_RAM_FOR_COUCHBASE  
-
- echo "setting data path"
- curl -v  http://$MY_IP:8091/nodes/self/controller/settings -d path=$COUCHBASE_DATA
-
-  curl -v http://$MY_IP:8091/pools/default -d memoryQuota=$DATA_RAM_FOR_COUCHBASE -d indexMemoryQuota=$INDEX_RAM_FOR_COUCHBASE
-
-  echo "setting username password"
-  curl -v http://$MY_IP:8091/settings/web -d port=8091 -d username=${ADMINISTRATOR} -d password=${PASSWORD}
-
-
-  echo "setting Memory Quota"
-  curl -v -u ${ADMINISTRATOR}:${PASSWORD}  -X POST http://$MY_IP:8091/pools/default -d memoryQuota=$DATA_RAM_FOR_COUCHBASE -d indexMemoryQuota=$INDEX_RAM_FOR_COUCHBASE
-
-  
-  echo "setting failover"
-  curl -i -u ${ADMINISTRATOR}:${PASSWORD} http://$MY_IP:8091/settings/autoFailover -d 'enabled=true&timeout=600'
-
- echo "renaming cluster"
- curl -v -X POST -u  ${ADMINISTRATOR}:${PASSWORD}  http://$MY_IP:8091/node/controller/rename -d hostname=$MY_IP
-
-for (( i = 0; i < ${#MEMBER_IP_ADDRESSES[@]}; i++ )); do
-
-    WORKER_IP=${MEMBER_IP_ADDRESSES[$i]}
-    PARAMETER="hostname=${WORKER_IP}:8091&user=${ADMINISTRATOR}&password=${PASSWORD}"
-    echo "Initializing the node of the cluster on ${MEMBER_IP_ADDRESSES[$i]}."
-
-   curl -v http://${MEMBER_IP_ADDRESSES[$i]}:8091/node/controller/setupServices -d services=kv%2Cn1ql%2Cindex
-
-   echo "setting data path"
-   curl -v http://${MEMBER_IP_ADDRESSES[$i]}:8091/nodes/self/controller/settings -d path=$COUCHBASE_DATA
-
-   echo "setting username password on other nodes"
-   curl -v http://${MEMBER_IP_ADDRESSES[$i]}:8091/settings/web -d port=8091 -d username=${ADMINISTRATOR} -d password=${PASSWORD}  
-
-    #sleep 60
-    echo " Adding Node"
-    COMMAND=$(echo curl -u ${ADMINISTRATOR}:${PASSWORD} "http://$MY_IP:8091/controller/addNode" -d ${PARAMETER})
-    echo ${COMMAND}
-    ${COMMAND}
-
-KNOWN_NODES="ns_1@"$(echo ${MEMBER_IP_ADDRESSES[$i]}),${KNOWN_NODES}
-echo "Done adding node"
-done
-
-  log "Reblancing the cluster"
-  #sleep 60
-  /opt/couchbase/bin/couchbase-cli rebalance -c "$MY_IP":8091 -u "${ADMINISTRATOR}" -p "${PASSWORD}"
+  echo "master", $MY_IP >>  /tmp/instances.txt
+  for (( i = 0; i < ${#MEMBER_IP_ADDRESSES[@]}; i++ )); do
+  echo "slave", ${MEMBER_IP_ADDRESSES[$i]} >> /tmp/instances.txt
+ done 
 fi
-echo "Install & Setup for couchbase complete!"
+
+chmod +x /tmp/instances.txt
+python azure_cluster.py
+rm -f  /tmp/instances.txt

@@ -31,7 +31,8 @@
       "setupCommand": "[concat('bash ./couchbase-azure-install.sh -n ', parameters('clusterName'), ' -i ', parameters('vmBasename'), '-', parameters('dataNodeCount'), ' -a ', parameters('cbUsername'), ' -p ', parameters('cbPassword'), ' -l')]",
       "fileUris": [
           "[concat(parameters('scriptUri'), '/couchbase-azure-install.sh')]",
-          "[concat(parameters('scriptUri'), '/vm-disk-utils-0.1.sh')]"
+          "[concat(parameters('scriptUri'), '/vm-disk-utils-0.1.sh')]",
+          "[concat(parameters('scriptUri'), '/azure_cluster.py')]"
           ],
       "loopCount": "[sub(parameters('dataNodeCount'), 1)]"
     },
