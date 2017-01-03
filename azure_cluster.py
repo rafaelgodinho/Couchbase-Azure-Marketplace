@@ -91,8 +91,8 @@ def main():
     data_quota = instance["DATA_QUOTA"]
     
     setup_datapath(master_ip, datapath)
-    setup_uname_pass(uname, passwd, master_ip)
     setup_service(uname, passwd, master_ip, 'index,kv,n1ql')
+    setup_uname_pass(uname, passwd, master_ip)
     setup_memquota(uname, passwd, master_ip, index_quota, data_quota)
     rename(master_ip, uname, passwd)
 

@@ -26,10 +26,6 @@
           "constraints": {
             "allowedValues": [
               {
-                "label": "4.0 Community Edition",
-                "value": "couchbase-server-40-community |cbs_40_ce"
-              },
-              {
                 "label": "4.5 Enterprise Edition - Silver",
                 "value": "couchbase-server-40-enterprise|cbs_40_ee_silver"
               },

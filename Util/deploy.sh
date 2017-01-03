@@ -5,9 +5,9 @@ startTime=$(date)
 
 azure config mode arm
 #RG's subscriptionId
-subscriptionId="f1766062-4c0b-4112-b926-2508fecc5bdf"
+#subscriptionId="f1766062-4c0b-4112-b926-2508fecc5bdf"
 #Couchbase's subscriptionId
-#subscriptionId="a8cd090a-e76d-4f04-aa15-9f6bb65b68de"
+subscriptionId="a8cd090a-e76d-4f04-aa15-9f6bb65b68de"
 azure account set $subscriptionId
 
 storageAccountName="rgcb"
