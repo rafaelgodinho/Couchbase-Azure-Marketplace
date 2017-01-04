@@ -13,7 +13,7 @@ azure account set $subscriptionId
 
 storageAccountResourceGroupName="rgcb"
 storageAccountName="rgcb"
-containerName="deployrg"
+containerName="deployrg" #this container needs to exist and have read public access
 #storageAccountKey=$(azure storage account keys list $storageAccountName --resource-group $storageAccountResourceGroupName --json | jq .[0].value | tr -d '"')
 storageAccountKey=$(azure storage account keys list $storageAccountName --resource-group $storageAccountResourceGroupName | grep key1 | awk '{print $3}')
 
